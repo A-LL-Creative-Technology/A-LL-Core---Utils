@@ -39,12 +39,18 @@ public class APIController : MonoBehaviour
 
     private void Awake()
     {
-        instance = this;
+        //Ensure Singleton
+        if (instance != null && instance != this)
+            Destroy(this.gameObject);
+        else
+            instance = this;
     }
 
     private void HandleError(RequestException requestException, string endpoint, Action<RequestException> errorCallback = null, bool showAPIErrorNotification = true)
     {
+        #if USE_ALL_CORE
         GlobalController.LogMe("Error in the API call: " + endpoint + " - " + requestException.Message + " - " + requestException.Response);
+        #endif
 
         nbRequestsInProgress--;
         //Debug.Log("Simul -- " + nbRequestsInProgress + " " + endpoint);
@@ -65,7 +71,11 @@ public class APIController : MonoBehaviour
             if (showAPIErrorNotification)
             {
                 //Get the first error
+                #if USE_ALL_CORE
                 NavigationController.GetInstance().OnNotificationOpen(false, -1, "Erreur de connexion", NavigationController.GetInstance().notificationStringPrefix + data["errors"][0][0]);
+                #else
+                //TODO send event
+                #endif
             }
         }
         else if (data.HasKey("message"))
@@ -73,15 +83,19 @@ public class APIController : MonoBehaviour
             if (showAPIErrorNotification)
             {
                 //Fallback on the message
+#if USE_ALL_CORE
                 NavigationController.GetInstance().OnNotificationOpen(false, -1, "Erreur de connexion", NavigationController.GetInstance().notificationStringPrefix + data["message"]);
+#endif
             }
         }
         else
         {
             if (showAPIErrorNotification)
             {
+#if USE_ALL_CORE
                 //Fallback
                 NavigationController.GetInstance().OnNotificationOpen(false, -1, "Erreur de connexion", "CODE_General_Connection_Error");
+#endif
             }
         }
 
@@ -91,9 +105,10 @@ public class APIController : MonoBehaviour
 
     private IEnumerator EnsureRequestCanBeSent(Action callback, bool shallWaitForPendingRequests = false)
     {
+#if USE_ALL_CORE
         while (!ALLCoreConfig.isALLCoreReady)
             yield return null;
-
+#endif
         while (shallWaitForPendingRequests && nbRequestsInProgress > 0)
         {
             //Debug.Log("Wait");
@@ -105,11 +120,14 @@ public class APIController : MonoBehaviour
         //Debug.Log("Simul ++ " + nbRequestsInProgress);
 
         callback.Invoke();
+
     }
 
     //Test user connected
+    [Obsolete("APIController.IsConnected() is deprecated, please use the same methode from the CacheController.")]
     public static bool IsConnected(string customAPIToken = "", string customAPITokenExpiresAt = "")
     {
+#if USE_ALL_CORE
         bool hasLastUpdate = !String.IsNullOrEmpty(CacheController.GetInstance().apiConfig.last_update);
 
         string apiToken = String.IsNullOrEmpty(customAPIToken) ? CacheController.GetInstance().apiConfig.api_token : customAPIToken;
@@ -118,6 +136,10 @@ public class APIController : MonoBehaviour
         bool hasValidToken = !String.IsNullOrEmpty(apiToken) && DateTime.Parse(apiTokenExpiresAt) > DateTime.Now;
 
         return hasLastUpdate && hasValidToken;
+#else
+        Debug.Log("This method should not be used !");
+        return false;
+#endif
     }
 
     //GET a SINGLE element of type R
@@ -280,6 +302,7 @@ public class APIController : MonoBehaviour
     {
         AddHeaders(customAPIToken);
 
+#if USE_ALL_CORE
         // add localization to header
         if (CacheController.GetInstance().appConfig.lang != "")
         {
@@ -293,6 +316,7 @@ public class APIController : MonoBehaviour
                 parameters.Add("lang", CacheController.GetInstance().appConfig.lang);
             }
         }
+#endif
 
         string uri = (customeServerURL == null) ? serverURL : customeServerURL;
         return new RequestHelper
@@ -331,7 +355,12 @@ public class APIController : MonoBehaviour
     //Add access_token and token_type to the Authorization header.
     private void AddAuthorizationHeader(string customAPIToken = null)
     {
+#if USE_ALL_CORE
         string apiToken = (String.IsNullOrEmpty(customAPIToken)) ? CacheController.GetInstance().apiConfig.api_token : customAPIToken;
+#else
+        string apiToken = customAPIToken;
+        //TODO Manage no cache present
+#endif
 
         if (String.IsNullOrEmpty(apiToken))
             return;
@@ -376,7 +405,11 @@ public class APIController : MonoBehaviour
 
         if (url.Length == 0 || indexOfSlash == -1)
         {
-            GlobalController.LogMe("Erreur parsing the URL for security: " + url);
+#if USE_ALL_CORE
+            GlobalController.LogMe("Error parsing the URL for security: " + url);
+#else
+            Debug.Log("Error parsing the URL for security: " + url);
+#endif
         }
 
         url = "https:" + url.Substring(indexOfSlash);

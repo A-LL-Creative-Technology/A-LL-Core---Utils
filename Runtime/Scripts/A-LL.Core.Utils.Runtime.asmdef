@@ -1,3 +1,23 @@
 {
-	"name": "A-LL.Core.Utils.Runtime"
+    "name": "A-LL.Core.Utils.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5",
+        "GUID:3ddc281cbfcae419795a99d406d20cb1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.all.core",
+            "expression": "2.0.0",
+            "define": "USE_ALL_CORE"
+        }
+    ],
+    "noEngineReferences": false
 }

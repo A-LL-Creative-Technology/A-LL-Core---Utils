@@ -62,8 +62,13 @@ public class NotificationController : MonoBehaviour
             }
             else
             {
+#if USE_ALL_CORE
                 GlobalController.LogMe(String.Format(
                   "Could not resolve all Firebase dependencies: {0}", dependencyStatus));
+#else
+                Debug.Log(String.Format(
+                  "Could not resolve all Firebase dependencies: {0}", dependencyStatus));
+#endif
                 // Firebase Unity SDK is not safe to use here.
             }
         });
@@ -80,7 +85,12 @@ public class NotificationController : MonoBehaviour
         if (!isCurrentlyPaused && isPaused)
         {
             // we just entered background
-            GlobalController.LogMe("Application just entered background");
+
+#if USE_ALL_CORE
+                GlobalController.LogMe("Application just entered background");
+#else
+            Debug.Log("Application just entered background");
+#endif
 
 #if UNITY_IOS
             // synchronize the badge number
@@ -91,7 +101,13 @@ public class NotificationController : MonoBehaviour
         if (isCurrentlyPaused && !isPaused)
         {
             // we just entered foreground
-            GlobalController.LogMe("Application just entered foreground");
+
+#if USE_ALL_CORE
+                GlobalController.LogMe("Application just entered foreground");
+#else
+            Debug.Log("Application just entered foreground");
+#endif
+
         }
 
         isCurrentlyPaused = isPaused;
@@ -107,7 +123,11 @@ public class NotificationController : MonoBehaviour
 
     public void OnPushNotificationTokenReceived(object sender, Firebase.Messaging.TokenReceivedEventArgs token)
     {
-        GlobalController.LogMe("Received the push notification registration token: " + token.Token);
+#if USE_ALL_CORE
+                GlobalController.LogMe("Received the push notification registration token: " + token.Token);
+#else
+        Debug.Log("Received the push notification registration token: " + token.Token);
+#endif
     }
 
     public void OnPushNotificationReceived(object sender, Firebase.Messaging.MessageReceivedEventArgs pushNotificationMessage)
@@ -132,8 +152,12 @@ public class NotificationController : MonoBehaviour
 
     private IEnumerator WaitForALLCoreReady(Action callback)
     {
+#if USE_ALL_CORE
         while (!ALLCoreConfig.isALLCoreReady)
             yield return null;
+#else
+        yield return null;
+#endif
 
         callback?.Invoke();
     }
