@@ -332,7 +332,6 @@ public class APIController : MonoBehaviour
     {
         RequestHelper request = BuildRequest(endpoint, parameters, customServerURL, customAPIToken);
         request.FormSections = GenerateFormData(body, files);
-        request.Body = body;
 
         return request;
     }
