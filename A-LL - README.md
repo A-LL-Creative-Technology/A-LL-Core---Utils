@@ -11,7 +11,7 @@ To use this package in a unity project :
     1. Download the firebase SDKs “Firebase Cloud Messaging” and “Google Analytics for Firebase” for Unity : https://developers.google.com/unity/archive
     2. In Unity editor, right-click on Assets then *Import Package* -> *Custom Package...* to import both packages.
 4. Add the following third-party packages from the Package Manager
-    1. Connect using the lab@a-ll.tech account in Unity
+    1. Ask Laurent to give you access to the packages in Unity
     2. Select "My Assets" in the Package Manager to display paid Packages from the Asset Store
     3. Select and import all these packages
         - Rest Client for Unity 
