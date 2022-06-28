@@ -297,6 +297,46 @@ public class APIController : MonoBehaviour
         }, shallWaitForPendingRequests));
     }
 
+    public void GetAudio(string audioUri, Action<AudioClip> callback, Action<RequestException> errorCallback = null, bool showAPIErrorNotification = true, bool shallWaitForPendingRequests = false)
+    {
+        StartCoroutine(EnsureRequestCanBeSent(() =>
+        {
+            //Debug.Log("Get audio " + audioUri);
+
+
+            RestClient.Get(new RequestHelper
+            {
+                Uri = audioUri, // url is insecure as Kentico staging is not in https (an exception for that domain has been added to InfoPlistUpdater.cs in the Editor folder of Unity)
+                DownloadHandler = new DownloadHandlerAudioClip(audioUri, AudioType.MPEG),
+            }).Then(res =>
+            {
+                nbRequestsInProgress--;
+                //Debug.Log("Simul -- " + nbRequestsInProgress + " " + imageUri);
+
+                AudioClip audioClip = ((DownloadHandlerAudioClip)res.Request.downloadHandler).audioClip;
+                callback?.Invoke(audioClip);
+            }).Catch(err =>
+            {
+                RequestException requestException = (RequestException)err;
+
+                // if no network, we do not display the error but simply call the errorCallback
+                if (requestException.IsNetworkError)
+                {
+                    nbRequestsInProgress--;
+                    //Debug.Log("Simul -- " + nbRequestsInProgress + " " + imageUri);
+
+                    errorCallback?.Invoke(requestException);
+                }
+                else
+                {
+                    HandleError(requestException, audioUri, errorCallback, showAPIErrorNotification);
+                }
+
+            });
+        }, shallWaitForPendingRequests));
+    }
+
+
     //Build request header and body
     private RequestHelper BuildRequest(string endpoint, Dictionary<string, string> parameters, string customeServerURL = null, string customAPIToken = null)
     {
