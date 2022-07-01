@@ -37,9 +37,9 @@ public class AssetBundlesController : MonoBehaviour
         downloadedBundleStatus = new Dictionary<string, BUNDLE_STATUS>();
     }
 
-    public IEnumerator GetAssetBundle(string assetURI, string assetName, uint version = 0, Action<UnityEngine.Object> successCallBack = null, Action<string> errorCallBack = null)
+    public IEnumerator DownloadAssetBundle(string assetURI, string assetName, uint version = 0, Action<AssetBundle> successCallBack = null, Action<string> errorCallBack = null)
     {
-        downloadedBundleStatus.Add(assetURI, BUNDLE_STATUS.PENDING);
+        downloadedBundleStatus.Add(assetName, BUNDLE_STATUS.PENDING);
 
         UnityWebRequest www = (version > 0) ? UnityWebRequestAssetBundle.GetAssetBundle(assetURI, version, 0) : UnityWebRequestAssetBundle.GetAssetBundle(assetURI);
 
@@ -48,29 +48,49 @@ public class AssetBundlesController : MonoBehaviour
         if (www.result != UnityWebRequest.Result.Success)
         {
             downloadedBundleStatus[assetURI] = BUNDLE_STATUS.ERROR;
+            Debug.Log(www.error);
             errorCallBack?.Invoke(www.error);
         }
         else
         {
+            downloadedBundleStatus[assetURI] = BUNDLE_STATUS.READY;
+
             AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(www);
 
-            AssetBundleRequest assetRequest = bundle.LoadAssetAsync<GameObject>(assetName);
-            yield return assetRequest;
-
-            if (!assetRequest.asset)
-            {
-                downloadedBundleStatus[assetURI] = BUNDLE_STATUS.EMPTY;
-            }
+            if (successCallBack != null)
+                successCallBack.Invoke(bundle);
             else
-            {
-                UnityEngine.Object asset = assetRequest.asset;
-
-                successCallBack?.Invoke(asset);
                 bundle.Unload(false);
+        }
+    }
 
-                downloadedBundleStatus[assetURI] = BUNDLE_STATUS.READY;
-            }
 
+    public void DownloadAndUnpackAssetBundle(string assetURI, string assetName, uint version = 0, Action<UnityEngine.Object> successCallBack = null, Action<string> errorCallBack = null)
+    {
+        StartCoroutine(DownloadAssetBundle(assetURI, assetName, version, (AssetBundle bundle) =>
+        {
+            StartCoroutine(UnpackAssetBundle(assetName, bundle, successCallBack, errorCallBack));
+        }, errorCallBack));
+    }
+
+    public IEnumerator UnpackAssetBundle(string assetName, AssetBundle bundle, Action<UnityEngine.Object> successCallBack = null, Action<string> errorCallBack = null)
+    {
+        AssetBundleRequest assetRequest = bundle.LoadAssetAsync<GameObject>(assetName);
+
+        yield return assetRequest;
+
+        if (!assetRequest.asset)
+        {
+            downloadedBundleStatus[assetName] = BUNDLE_STATUS.EMPTY;
+        }
+        else
+        {
+            UnityEngine.Object asset = assetRequest.asset;
+
+            successCallBack?.Invoke(asset);
+            bundle.Unload(false);
+
+            downloadedBundleStatus[assetName] = BUNDLE_STATUS.READY;
         }
     }
 
