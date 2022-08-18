@@ -16,5 +16,5 @@ To use this package in a unity project :
     3. Select and import all these packages
         - Rest Client for Unity 
             1. Additionnaly, create an Assembly Definition Reference named "Main Proyecto26" in "RestClient/Packages"
-            2. Link it to Assembly A-LL.Core.Runtime.asmdef
+            2. Link it to Assembly A-LL.Core.Utils.Runtime.asmdef
 5. Copy/Paste files in "A-LL Core - Utils/Assets To Copy/A-LL/Config/Firebase/" and paste them to "Assets/A-LL/Config/Firebase/" (create this path) and rename by removing the prefix "Sandbox - "
