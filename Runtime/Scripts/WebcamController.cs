@@ -9,8 +9,9 @@ public class WebcamController : MonoBehaviour
 
     [SerializeField] private string specifiedWebcamToLookFor = "BRIO";
 
-    public RawImage rawimage;
     public GameObject webcamView;
+
+    private RawImage rawimage;
 
     bool isWebcamFound = false;
     bool isDefaultWebcamSet = false;
@@ -19,6 +20,8 @@ public class WebcamController : MonoBehaviour
     {
         //Hide Cursor
         Cursor.visible = false;
+
+        rawimage = webcamView.GetComponent<RawImage>();
 
         InitWebcam();
     }
