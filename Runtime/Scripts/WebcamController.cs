@@ -8,8 +8,12 @@ public class WebcamController : MonoBehaviour
 {
 
     [SerializeField] private string specifiedWebcamToLookFor = "BRIO";
+    [SerializeField] private int requestedFPS = 30;
+    [SerializeField] private int requestedWidth = 1920;
+    [SerializeField] private int requestedHeight = 1080;
 
     public GameObject webcamView;
+
 
     private RawImage rawimage;
 
@@ -20,6 +24,8 @@ public class WebcamController : MonoBehaviour
     {
         //Hide Cursor
         Cursor.visible = false;
+
+        Application.targetFrameRate = 30;
 
         rawimage = webcamView.GetComponent<RawImage>();
 
@@ -71,9 +77,9 @@ public class WebcamController : MonoBehaviour
 
 
 
-        webcamTexture.requestedFPS = 60;
-        webcamTexture.requestedHeight = 1080;
-        webcamTexture.requestedWidth = 1920;
+        webcamTexture.requestedFPS = requestedFPS;
+        webcamTexture.requestedHeight = requestedHeight;
+        webcamTexture.requestedWidth = requestedWidth;
 
         rawimage.texture = webcamTexture;
         rawimage.material.mainTexture = webcamTexture;
