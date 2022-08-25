@@ -82,7 +82,7 @@ public class WebcamController : MonoBehaviour
         webcamTexture.requestedWidth = requestedWidth;
 
         rawimage.texture = webcamTexture;
-        rawimage.material.mainTexture = webcamTexture;
+        // rawimage.material.mainTexture = webcamTexture;
 
         webcamTexture.Play();
     }
