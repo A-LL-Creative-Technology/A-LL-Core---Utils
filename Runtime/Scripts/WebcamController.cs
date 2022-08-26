@@ -40,9 +40,9 @@ public class WebcamController : MonoBehaviour
         
         foreach (WebCamDevice currentDevice in WebCamTexture.devices)
         {
-            Debug.Log(currentDevice.name);
-
             string cameraShortName = currentDevice.name.Split(' ')[0];
+
+            Debug.Log(cameraShortName);
 
             if (String.Equals(cameraShortName, specifiedWebcamToLookFor))
             {
