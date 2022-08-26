@@ -34,7 +34,7 @@ public class WebcamController : MonoBehaviour
     /// <summary>
     /// The delay
     /// </summary>
-    public float delay = 0.5f;
+    public float delay = 0.05f;
 
     public GameObject webcamView;
 
@@ -80,6 +80,8 @@ public class WebcamController : MonoBehaviour
         Singleton = this;
 
         coroutineRender = Render();
+
+        Debug.Log("Use the keys 'd' and 's' to respectively increase (decrease) the webcam delay.");
     }
 
     void Start()
