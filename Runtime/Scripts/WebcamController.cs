@@ -73,13 +73,14 @@ public class WebcamController : MonoBehaviour
     /// </summary>
     private int frameIndex;
 
-
-
     private void Awake()
     {
         Singleton = this;
 
         coroutineRender = Render();
+
+        if (PlayerPrefs.HasKey("Delay"))
+            OnSetDelay(PlayerPrefs.GetFloat("Delay"));
 
         Debug.Log("Use the keys 'd' and 's' to respectively increase (decrease) the webcam delay.");
     }
@@ -100,8 +101,6 @@ public class WebcamController : MonoBehaviour
 
     private void InitWebcam()
     {
-        
-
         Debug.Log("Available Webcams");
         
         foreach (WebCamDevice currentDevice in WebCamTexture.devices)
@@ -179,8 +178,9 @@ public class WebcamController : MonoBehaviour
 
         delay = newDelay < 0 ? 0 : newDelay;
 
-        frameIndex = capturedFrameIndex = renderedFrameIndex = 0;
+        PlayerPrefs.SetFloat("Delay", delay);
 
+        frameIndex = capturedFrameIndex = renderedFrameIndex = 0;
 
         bufferSize = (int)(requestedFPS * delay * 20); // compute the buffer size including some margin
 
