@@ -149,8 +149,6 @@ public class WebcamController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator Render()
     {
-        Debug.Log("start Render");
-
         WaitForEndOfFrame wait = new WaitForEndOfFrame();
 
         while (true)
@@ -188,7 +186,7 @@ public class WebcamController : MonoBehaviour
 
         if (delay > 0f)
             StartCoroutine(coroutineRender);
-        else
+        else if(webcamTexture !=null)
             rawimage.texture = webcamTexture;
 
         Debug.Log("Webcam delayed by: " + newDelay + "s (buffer: " + bufferSize + ")");
