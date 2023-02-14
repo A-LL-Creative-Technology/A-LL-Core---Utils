@@ -22,7 +22,7 @@ public class AssetBundlesController : MonoBehaviour
         EMPTY,
     }
 
-    private Dictionary<string, BUNDLE_STATUS> downloadedBundleStatus;
+    private Dictionary<string, BUNDLE_STATUS> downloadedBundleStatus = new Dictionary<string, BUNDLE_STATUS>();
 
     private void Awake()
     {
@@ -65,17 +65,17 @@ public class AssetBundlesController : MonoBehaviour
     }
 
 
-    public void DownloadAndUnpackAssetBundle(string assetURI, string assetName, uint version = 0, Action<UnityEngine.Object> successCallBack = null, Action<string> errorCallBack = null)
+    public void DownloadAndUnpackAssetBundle<T>(string assetURI, string assetName, uint version = 0, Action<UnityEngine.Object> successCallBack = null, Action<string> errorCallBack = null)
     {
         StartCoroutine(DownloadAssetBundle(assetURI, assetName, version, (AssetBundle bundle) =>
         {
-            StartCoroutine(UnpackAssetBundle(assetName, bundle, successCallBack, errorCallBack));
+            StartCoroutine(UnpackAssetBundle<T>(assetName, bundle, successCallBack, errorCallBack));
         }, errorCallBack));
     }
 
-    public IEnumerator UnpackAssetBundle(string assetName, AssetBundle bundle, Action<UnityEngine.Object> successCallBack = null, Action<string> errorCallBack = null)
+    public IEnumerator UnpackAssetBundle<T>(string assetName, AssetBundle bundle, Action<UnityEngine.Object> successCallBack = null, Action<string> errorCallBack = null)
     {
-        AssetBundleRequest assetRequest = bundle.LoadAssetAsync<GameObject>(assetName);
+        AssetBundleRequest assetRequest = bundle.LoadAssetAsync<T>(assetName);
 
         yield return assetRequest;
 
@@ -91,6 +91,30 @@ public class AssetBundlesController : MonoBehaviour
             bundle.Unload(false);
 
             downloadedBundleStatus[assetName] = BUNDLE_STATUS.READY;
+        }
+    }
+
+    public IEnumerator UnpackAllAssetBundle<T>(string bundleName, AssetBundle bundle, Action<UnityEngine.Object> successCallBack = null, Action<string> errorCallBack = null)
+    {
+        AssetBundleRequest assetRequest = bundle.LoadAllAssetsAsync<T>();
+
+        yield return assetRequest;
+
+        if (assetRequest.allAssets.Length == 0)
+        {
+            downloadedBundleStatus[bundleName] = BUNDLE_STATUS.EMPTY;
+        }
+        else
+        {
+
+            foreach (UnityEngine.Object item in assetRequest.allAssets)
+            {
+                successCallBack?.Invoke(item);
+            }
+
+            bundle.Unload(false);
+
+            downloadedBundleStatus[bundleName] = BUNDLE_STATUS.READY;
         }
     }
 
