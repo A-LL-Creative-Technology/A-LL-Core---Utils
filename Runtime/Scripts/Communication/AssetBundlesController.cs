@@ -40,7 +40,8 @@ public class AssetBundlesController : MonoBehaviour
     public IEnumerator DownloadAssetBundle(string assetURI, string assetName, uint version = 0, Action<AssetBundle> successCallBack = null, Action<string> errorCallBack = null)
     {
         downloadedBundleStatus.Add(assetName, BUNDLE_STATUS.PENDING);
-
+        Debug.Log("Asset URI: " + assetURI);
+        Debug.Log("AssetBundle version: " + version);
         UnityWebRequest www = (version > 0) ? UnityWebRequestAssetBundle.GetAssetBundle(assetURI, version, 0) : UnityWebRequestAssetBundle.GetAssetBundle(assetURI);
 
         yield return www.SendWebRequest();
@@ -59,16 +60,15 @@ public class AssetBundlesController : MonoBehaviour
 
             if (successCallBack != null)
                 successCallBack.Invoke(bundle);
-            else
-                bundle.Unload(false);
         }
     }
 
 
-    public void DownloadAndUnpackAssetBundle<T>(string assetURI, string assetName, uint version = 0, Action<UnityEngine.Object> successCallBack = null, Action<string> errorCallBack = null)
+    public void DownloadAndUnpackAssetBundle<T>(string assetURI, string assetName, uint version = 0, Action<UnityEngine.Object> successCallBack = null, Action<AssetBundle> bundleSuccessCallBack = null, Action<string> errorCallBack = null)
     {
         StartCoroutine(DownloadAssetBundle(assetURI, assetName, version, (AssetBundle bundle) =>
         {
+            bundleSuccessCallBack?.Invoke(bundle); // invoke the new callback here
             StartCoroutine(UnpackAssetBundle<T>(assetName, bundle, successCallBack, errorCallBack));
         }, errorCallBack));
     }
@@ -88,7 +88,6 @@ public class AssetBundlesController : MonoBehaviour
             UnityEngine.Object asset = assetRequest.asset;
 
             successCallBack?.Invoke(asset);
-            bundle.Unload(false);
 
             downloadedBundleStatus[assetName] = BUNDLE_STATUS.READY;
         }
@@ -106,13 +105,10 @@ public class AssetBundlesController : MonoBehaviour
         }
         else
         {
-
             foreach (UnityEngine.Object item in assetRequest.allAssets)
             {
                 successCallBack?.Invoke(item);
             }
-
-            bundle.Unload(false);
 
             downloadedBundleStatus[bundleName] = BUNDLE_STATUS.READY;
         }
